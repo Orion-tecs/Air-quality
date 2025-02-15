@@ -1,0 +1,65 @@
+// Include necessary libraries
+#include <Wire.h>
+#include <LiquidCrystal.h>
+#include <DHT.h>
+
+// Define sensor pins
+#define DHTPIN 10
+#define MQ135PIN A0
+const int rs = 2, en = 3, d4 = 4, d5 = 5, d6 = 6, d7 = 7;
+LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
+// Initialize DHT sensor
+DHT dht(DHTPIN, DHT11);    //change the DHT11 to DHT11 as per your sensor spec
+
+// Initialize LCD
+
+
+void setup() {
+  // Start sensors
+  dht.begin();
+  Serial.begin(9600);
+  // Start LCD
+  lcd.begin(16,2);
+  
+  lcd.clear();
+  lcd.setCursor(0, 0);
+  lcd.print("Air Quality:");
+
+  // Initialize relay control pin
+  pinMode(9, OUTPUT);
+}
+
+void loop() {
+  // Read temperature and humidity
+  float temperature = dht.readTemperature();
+  float humidity = dht.readHumidity();
+
+  // Read CO2 and VOC levels
+  int co2Level = analogRead(MQ135PIN);
+Serial.println(co2Level);
+  // Display data on LCD
+  lcd.setCursor(0, 1);
+  lcd.print("T:");
+  lcd.print(temperature);
+  lcd.write(223);
+  lcd.print("C          ");
+  delay(1000);
+  lcd.setCursor(0, 1);
+  lcd.print("H:");
+  lcd.print(humidity);
+  lcd.print("%          ");
+  delay(1000);
+  lcd.setCursor(0, 1);
+  lcd.print("CO2:");
+  lcd.print(co2Level);
+  lcd.print("ppm        ");
+
+  
+  if (co2Level > 800) {
+    digitalWrite(9, HIGH);  
+  } else {
+    digitalWrite(9, LOW);  
+  }
+
+  delay(1000);  // Delay for 5 seconds before taking the next reading
+}
